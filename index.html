@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080c14">
+  <meta name="description" content="用张开的手掌和握拳，实时塑造图片轮廓的 3D 粒子。">
+  <title>手势粒子实验室 · Gesture Particle Lab</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="scene" aria-label="交互式三维粒子画布"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="手势粒子实验室首页">
+      <span class="brand-mark"><i></i><i></i><i></i><i></i></span>
+      <span>GESTURE<span class="brand-accent"> / </span>FIELD</span>
+    </a>
+    <div class="top-status"><span id="statusDot" class="status-dot"></span><span id="statusText">等待连接摄像头</span></div>
+    <span class="edition">INTERACTIVE STUDY <b>01 / 03</b></span>
+  </header>
+
+  <main id="top">
+    <section class="intro">
+      <div class="eyebrow"><span class="eyebrow-line"></span> REAL-TIME GESTURE EXPERIMENT</div>
+      <h1>让手势<br><em>塑造光的形状。</em></h1>
+      <p>张开手掌，照片化为向外舒展的粒子。轻握成拳，粒子凝聚并还原完整照片，背景音随之响起。</p>
+      <div class="gesture-guide">
+        <div class="guide-item"><span class="gesture-icon palm">✋</span><div><b>张开手掌</b><small>扩散 / EXPAND</small></div></div>
+        <span class="guide-rule"></span>
+        <div class="guide-item"><span class="gesture-icon fist">✊</span><div><b>握紧拳头</b><small>还原照片 + 声音 / PHOTO</small></div></div>
+      </div>
+    </section>
+
+    <aside class="control-panel" aria-label="交互控制">
+      <div class="panel-head"><span>CONTROL STATION</span><span class="panel-index">01 — 04</span></div>
+      <h2>控制台<span class="panel-spark">✦</span></h2>
+      <p class="panel-note">摄像头画面仅在本机处理。张掌显示粒子照片，握拳还原清晰原图。</p>
+
+      <button id="cameraButton" class="primary-button" type="button"><span class="button-symbol">◉</span><span id="cameraButtonText">启动摄像头</span><span class="button-arrow">↗</span></button>
+
+      <label class="upload-zone" for="imageInput">
+        <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+        <span class="upload-icon">⬡</span>
+        <span class="upload-copy"><b>载入模型图片</b><small id="imageName">选择图片，生成照片粒子</small></span>
+        <span class="upload-plus">＋</span>
+      </label>
+
+      <div class="control-divider"></div>
+      <div class="control-row"><span>粒子密度</span><span id="densityValue">14,000</span></div>
+      <input id="densityInput" class="range" type="range" min="4000" max="24000" value="14000" step="500" aria-label="粒子密度">
+      <div class="control-row sound-row"><span>背景音量</span><span id="volumeValue">35%</span></div>
+      <input id="volumeInput" class="range" type="range" min="0" max="100" value="35" step="1" aria-label="背景音量">
+      <div class="small-actions"><button id="muteButton" class="text-button" type="button">♫ 开启声音</button><button id="resetButton" class="text-button" type="button">↺ 重置视角</button></div>
+
+      <div class="control-divider"></div>
+      <p class="mini-label">没有摄像头？先试试手动演示</p>
+      <div class="demo-buttons"><button id="demoOpen" type="button">张掌粒子</button><button id="demoFist" type="button">握拳照片</button><button id="demoIdle" type="button">复位</button></div>
+    </aside>
+
+    <section class="monitor" aria-label="摄像头监视窗口">
+      <div class="monitor-top"><span><span class="live-dot"></span> LIVE INPUT</span><span id="fpsLabel">— FPS</span></div>
+      <div class="video-frame"><video id="cameraVideo" autoplay muted playsinline></video><canvas id="handCanvas" aria-hidden="true"></canvas><div id="cameraPlaceholder" class="camera-placeholder"><div class="target-shape"><span></span><span></span><span></span><span></span></div><p>等待摄像头画面</p></div><span class="frame-corner top-left"></span><span class="frame-corner top-right"></span><span class="frame-corner bottom-left"></span><span class="frame-corner bottom-right"></span></div>
+      <div class="monitor-bottom"><span id="gestureLabel">未识别手势</span><span id="confidenceLabel">--</span></div>
+    </section>
+
+    <div class="scene-label"><span class="label-rule"></span><span id="sceneMode">ORBITAL FORM / DEMO MODEL</span><span class="label-rule"></span></div>
+    <div class="stage-hint">拖动旋转 <span>·</span> 滚轮缩放 <span>·</span> 按住手势体验实时变化</div>
+  </main>
+
+  <footer><span>GESTURE / FIELD © 2026</span><span>LOCAL CAMERA PROCESSING <i>●</i> SOUND ON FIST</span></footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
