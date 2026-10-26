@@ -35,7 +35,9 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets/www
           cp index.html style.css app.js android/app/src/main/assets/www/
-          cp -R assets vendor android/app/src/main/assets/www/
+          cp -R assets android/app/src/main/assets/www/
+          mkdir -p android/app/src/main/assets/www/vendor
+          cp -R vendor/three android/app/src/main/assets/www/vendor/
           cp vendor/mediapipe/gesture_recognizer.task android/app/src/main/assets/gesture_recognizer.task
       - name: Build APK
         run: gradle -p android :app:assembleDebug --no-daemon --stacktrace
@@ -44,7 +46,7 @@ jobs:
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/index.html'
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/assets/model.jpg'
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/assets/background.aac'
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/vendor/mediapipe/gesture_recognizer.task'
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/gesture_recognizer.task'
       - uses: actions/upload-artifact@v4
         with:
           name: GestureParticles-Android-APK
@@ -54,11 +56,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.2.apk
-          if gh release view android-v1.0.2 >/dev/null 2>&1; then
-            echo 'Release android-v1.0.2 already exists; keeping its signed APK unchanged.'
+          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.3.apk
+          if gh release view android-v1.0.3 >/dev/null 2>&1; then
+            echo 'Release android-v1.0.3 already exists; keeping its signed APK unchanged.'
           else
-            gh release create android-v1.0.2 GestureParticles-Android-v1.0.2.apk \
-              --title '手势粒子照片 Android v1.0.2' \
+            gh release create android-v1.0.3 GestureParticles-Android-v1.0.3.apk \
+              --title '手势粒子照片 Android v1.0.3' \
               --notes '改用安卓原生摄像头和 MediaPipe 手势识别，绕开 WebView 模型初始化失败。支持控制台缩小和放大；照片、背景音和模型已打包，可离线使用。'
           fi

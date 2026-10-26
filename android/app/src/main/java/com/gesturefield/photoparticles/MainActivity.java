@@ -56,14 +56,7 @@ public final class MainActivity extends ComponentActivity {
 
         webView = new WebView(this);
         nativeGestureController = new NativeGestureController(this, webView);
-        webView.addJavascriptInterface(new Object() {
-            @JavascriptInterface public void start() {
-                runOnUiThread(() -> nativeGestureController.start());
-            }
-            @JavascriptInterface public void stop() {
-                runOnUiThread(() -> nativeGestureController.stop());
-            }
-        }, "AndroidGesture");
+        webView.addJavascriptInterface(new GestureBridge(), "AndroidGesture");
         webView.setBackgroundColor(Color.rgb(8, 13, 22));
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         WebSettings settings = webView.getSettings();
@@ -185,5 +178,15 @@ public final class MainActivity extends ComponentActivity {
         if (pendingFileChooser != null) pendingFileChooser.onReceiveValue(null);
         if (webView != null) webView.destroy();
         super.onDestroy();
+    }
+
+    public final class GestureBridge {
+        @JavascriptInterface public void start() {
+            runOnUiThread(() -> nativeGestureController.start());
+        }
+
+        @JavascriptInterface public void stop() {
+            runOnUiThread(() -> nativeGestureController.stop());
+        }
     }
 }
