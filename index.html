@@ -33,7 +33,9 @@
       </div>
     </section>
 
-    <aside class="control-panel" aria-label="交互控制">
+    <div id="panelBackdrop" class="panel-backdrop" hidden></div>
+    <button id="panelFab" class="panel-fab" type="button" aria-controls="controlPanel" aria-expanded="false">☷ 控制台</button>
+    <aside id="controlPanel" class="control-panel" aria-label="交互控制">
       <div class="panel-head"><span>CONTROL STATION</span><button id="panelToggle" class="panel-toggle" type="button" aria-controls="panelBody" aria-expanded="true">缩小控制台 −</button></div>
       <h2>控制台<span class="panel-spark">✦</span></h2>
       <p class="panel-note">摄像头画面仅在本机处理。张掌显示粒子照片，握拳还原清晰原图。</p>

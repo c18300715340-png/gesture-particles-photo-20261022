@@ -10,6 +10,7 @@ main{position:relative;z-index:3;min-height:calc(100vh - 138px)}.intro{position:
 .camera-diagnostic{margin:12px 0 0;color:#ffb5a5;font-size:12px;line-height:1.5;overflow-wrap:anywhere}.camera-diagnostic[hidden]{display:none}
 .panel-body[hidden]{display:none}.panel-toggle{border:1px solid #a5f3de55;border-radius:4px;background:#a5f3de16;color:var(--mint);font:600 11px "Microsoft YaHei",sans-serif;padding:7px 9px;white-space:nowrap}.panel-toggle:hover{background:#a5f3de2d}.panel-toggle:focus-visible{outline:2px solid var(--mint)}
 #nativeCameraPreview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}#nativeCameraPreview[hidden]{display:none}
+.panel-fab,.panel-backdrop{display:none}
 .top-status{max-width:34vw;min-width:0}.top-status span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 @media(max-width:760px){
@@ -21,4 +22,19 @@ main{position:relative;z-index:3;min-height:calc(100vh - 138px)}.intro{position:
   .control-panel{margin:calc(42dvh - 70px) 0 18px;padding:18px}
   .primary-button{height:56px;font-size:15px}
   .monitor{max-width:none;margin-bottom:18px}
+}
+
+@media(max-width:760px){
+  html,body{height:100%;overflow:hidden}
+  main{height:calc(100dvh - 58px);min-height:0;padding:0 16px}
+  .intro{position:absolute;left:16px;right:16px;top:22px;width:auto;padding:0}
+  .control-panel{position:fixed;top:auto;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-height:min(78dvh,680px);margin:0;overflow-y:auto;z-index:8;transform:translateY(calc(100% + 32px));opacity:0;visibility:hidden;pointer-events:none;transition:transform .25s ease,opacity .25s ease,visibility .25s}
+  .control-panel.mobile-open{transform:translateY(0);opacity:1;visibility:visible;pointer-events:auto}
+  .panel-fab{position:fixed;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:6;display:flex;align-items:center;justify-content:center;min-width:112px;min-height:48px;padding:0 16px;border:1px solid #a5f3de88;border-radius:999px;color:#09212a;background:#a5f3de;font-weight:700;box-shadow:0 8px 28px #0009}
+  .panel-fab[hidden],.panel-backdrop[hidden]{display:none}
+  .panel-backdrop{position:fixed;inset:0;z-index:7;display:block;background:#030911a8}
+  .monitor{position:fixed;top:auto;left:12px;right:auto;bottom:calc(16px + env(safe-area-inset-bottom));width:124px;max-width:124px;margin:0;padding:6px;z-index:4}
+  .monitor-top{font-size:7px;padding:1px 1px 5px}.monitor-bottom{font-size:7px;padding:5px 1px 1px}
+  .camera-placeholder{font-size:7px}.target-shape{transform:scale(.55);margin-bottom:0}
+  footer{display:none}
 }

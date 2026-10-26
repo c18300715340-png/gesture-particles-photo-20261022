@@ -15,9 +15,27 @@ const cameraButtonText = $('cameraButtonText');
 const cameraDiagnostic = $('cameraDiagnostic');
 const panelToggle = $('panelToggle');
 const panelBody = $('panelBody');
+const controlPanel = $('controlPanel');
+const panelFab = $('panelFab');
+const panelBackdrop = $('panelBackdrop');
 const densityInput = $('densityInput');
 const volumeInput = $('volumeInput');
 const compactScreen = window.matchMedia('(max-width: 760px)').matches;
+function setPanelOpen(open) {
+  if (!compactScreen) return;
+  controlPanel.classList.toggle('mobile-open', open);
+  controlPanel.setAttribute('aria-hidden', String(!open));
+  panelFab.setAttribute('aria-expanded', String(open));
+  panelFab.hidden = open;
+  panelBackdrop.hidden = !open;
+  document.body.classList.toggle('panel-open', open);
+  if (!open) panelFab.focus();
+}
+if (compactScreen) {
+  controlPanel.setAttribute('aria-hidden', 'true');
+  panelToggle.textContent = '关闭控制台 ×';
+  panelToggle.setAttribute('aria-controls', 'controlPanel');
+}
 if (compactScreen) {
   densityInput.min = '2500';
   densityInput.max = '12000';
@@ -122,7 +140,8 @@ function resize() {
   const h = window.innerHeight;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
-  camera.position.z = (w < 760 ? 17 : 11.5) + userZoom;
+  const mobileFitDistance = 7.5 / (2 * Math.tan(48 * Math.PI / 360) * camera.aspect);
+  camera.position.z = (w < 760 ? Math.max(17, mobileFitDistance) : 11.5) + userZoom;
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
@@ -402,6 +421,7 @@ async function startCamera() {
     recognizer = await GestureRecognizer.createFromOptions(vision, options);
     if (!cameraRunning) { recognizer.close(); recognizer = null; return; }
     updateStatus('正在识别手势', true);
+    setPanelOpen(false);
   } catch (error) {
     console.error(`摄像头或手势模型启动失败（${startupStep}）`, error);
     if (recognizer) { recognizer.close(); recognizer = null; }
@@ -445,6 +465,7 @@ window.onNativeCameraReady = () => {
   $('cameraPlaceholder').hidden = true;
   nativeCameraPreview.hidden = false;
   updateStatus('正在识别手势', true);
+  setPanelOpen(false);
 };
 
 window.onNativeCameraError = (message) => {
@@ -456,6 +477,7 @@ window.onNativeCameraError = (message) => {
   updateStatus(`启动失败：${message}`, false);
   cameraDiagnostic.textContent = `启动失败：${message}`;
   cameraDiagnostic.hidden = false;
+  setPanelOpen(true);
 };
 
 window.onNativeGesture = (result) => {
@@ -468,7 +490,13 @@ window.onNativeGesture = (result) => {
 };
 
 cameraButton.addEventListener('click', startCamera);
+panelFab.addEventListener('click', () => setPanelOpen(true));
+panelBackdrop.addEventListener('click', () => setPanelOpen(false));
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') setPanelOpen(false);
+});
 panelToggle.addEventListener('click', () => {
+  if (compactScreen) { setPanelOpen(false); return; }
   const expanded = panelBody.hidden;
   panelBody.hidden = !expanded;
   panelToggle.setAttribute('aria-expanded', String(expanded));
@@ -481,7 +509,7 @@ $('imageInput').addEventListener('change', async (event) => {
   if (uploadedObjectUrl) URL.revokeObjectURL(uploadedObjectUrl);
   uploadedObjectUrl = URL.createObjectURL(file);
   const img = new Image();
-  img.onload = () => { modelImage = img; imageToParticles(img, Number(densityInput.value)); $('imageName').textContent = file.name; $('sceneMode').textContent = 'CUSTOM IMAGE / PARTICLE OUTLINE'; };
+  img.onload = () => { modelImage = img; imageToParticles(img, Number(densityInput.value)); $('imageName').textContent = file.name; $('sceneMode').textContent = 'CUSTOM IMAGE / PARTICLE OUTLINE'; setPanelOpen(false); };
   img.onerror = () => updateStatus('图片读取失败，请换一张图片', cameraRunning);
   img.src = uploadedObjectUrl;
 });
@@ -492,7 +520,7 @@ $('muteButton').addEventListener('click', () => { audioEnabled = !audioEnabled; 
 $('muteButton').textContent = '♫ 声音开启';
 $('resetButton').addEventListener('click', () => { userRotX = 0; userRotY = 0; userZoom = 0; resize(); });
 for (const [id, next] of [['demoOpen','open'],['demoFist','fist'],['demoIdle','idle']]) {
-  $(id).addEventListener('click', () => { usingDemo = true; if (next === 'fist') prepareAudio(); setMode(next); });
+  $(id).addEventListener('click', () => { usingDemo = true; if (next === 'fist') prepareAudio(); setMode(next); setPanelOpen(false); });
 }
 
 canvas.addEventListener('pointerdown', e => { pointerDown = true; pointerX = e.clientX; pointerY = e.clientY; canvas.setPointerCapture(e.pointerId); });
