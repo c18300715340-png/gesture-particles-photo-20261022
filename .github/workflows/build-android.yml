@@ -56,11 +56,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.4.apk
-          if gh release view android-v1.0.4 >/dev/null 2>&1; then
-            echo 'Release android-v1.0.4 already exists; keeping its signed APK unchanged.'
+          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.5.apk
+          if gh release view android-v1.0.5 >/dev/null 2>&1; then
+            echo 'Release android-v1.0.5 already exists; keeping its signed APK unchanged.'
           else
-            gh release create android-v1.0.4 GestureParticles-Android-v1.0.4.apk \
-              --title '手势粒子照片 Android v1.0.4' \
-              --notes '手机版默认完整展示照片，控制台改为底部弹出面板，摄像头预览缩为底部小窗。保留安卓原生手势识别、离线照片与背景音。'
+            gh release create android-v1.0.5 GestureParticles-Android-v1.0.5.apk \
+              --title '手势粒子照片 Android v1.0.5' \
+              --notes '修复不同手机摄像头画面错位和花屏：交由 CameraX 按实际图像步幅转换位图。保留完整照片展示和底部弹出控制台。'
           fi

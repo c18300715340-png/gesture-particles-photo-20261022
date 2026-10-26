@@ -27,7 +27,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -132,10 +131,8 @@ final class NativeGestureController {
         boolean frameClosed = false;
         try {
             int rotation = image.getImageInfo().getRotationDegrees();
-            Bitmap bitmap = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            buffer.rewind();
-            bitmap.copyPixelsFromBuffer(buffer);
+            // CameraX handles differences in row stride and bitmap stride across phones.
+            Bitmap bitmap = image.toBitmap();
             image.close();
             frameClosed = true;
             Matrix matrix = new Matrix();
