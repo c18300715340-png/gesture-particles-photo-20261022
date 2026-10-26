@@ -8,3 +8,14 @@ main{position:relative;z-index:3;min-height:calc(100vh - 138px)}.intro{position:
 @media(max-width:1050px){.intro{width:36vw}.control-panel{right:3vw;width:268px}.monitor{left:3vw}.scene-label{bottom:13vh}.stage-hint{bottom:8vh}}@media(max-width:760px){body{overflow-y:auto}#scene{position:fixed;height:100dvh}.topbar{height:65px;padding:0 20px}.edition{display:none}.top-status{font-size:9px}main{min-height:960px;padding:0 20px}.intro,.control-panel,.monitor,.scene-label,.stage-hint{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;width:auto}.intro{padding-top:34px;max-width:400px}.intro h1{font-size:42px;margin:17px 0}.intro>p{font-size:12px}.gesture-guide{margin-top:20px;gap:13px}.control-panel{margin:380px 0 24px;padding:18px;width:100%}.monitor{width:100%;max-width:280px;margin:0 0 30px}.scene-label{display:none}.stage-hint{position:absolute;top:390px;left:50%;transform:translateX(-50%);font-size:9px}.grain{opacity:.2}footer{padding:0 20px;font-size:8px}footer span:last-child{display:none}}@media(max-width:410px){.brand{font-size:11px;gap:8px}.brand-mark{transform:scale(.8) rotate(-21deg)}.top-status{font-size:8px}.intro h1{font-size:36px}.gesture-guide{gap:9px}.guide-item b{font-size:10px}.guide-item small{font-size:8px}}
 .camera-placeholder[hidden]{display:none}
 .top-status{max-width:34vw;min-width:0}.top-status span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media(max-width:760px){
+  .topbar{height:58px;padding:0 16px}
+  main{min-height:0;padding:0 16px 28px}
+  .intro{padding-top:18px;max-width:none}
+  .intro .eyebrow,.intro>p,.gesture-guide,.stage-hint{display:none}
+  .intro h1{font-size:29px;line-height:1.14;margin:0}
+  .control-panel{margin:calc(42dvh - 70px) 0 18px;padding:18px}
+  .primary-button{height:56px;font-size:15px}
+  .monitor{max-width:none;margin-bottom:18px}
+}

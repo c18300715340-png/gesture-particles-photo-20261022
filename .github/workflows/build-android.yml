@@ -1,0 +1,63 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-android.yml'
+      - 'android/**'
+      - 'index.html'
+      - 'style.css'
+      - 'app.js'
+      - 'assets/**'
+      - 'vendor/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Bundle the offline website
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp index.html style.css app.js android/app/src/main/assets/www/
+          cp -R assets vendor android/app/src/main/assets/www/
+      - name: Build APK
+        run: gradle -p android :app:assembleDebug --no-daemon --stacktrace
+      - name: Check bundled files
+        run: |
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/index.html'
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/assets/model.jpg'
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/assets/background.aac'
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep 'assets/www/vendor/mediapipe/gesture_recognizer.task'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GestureParticles-Android-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Publish installable APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.0.apk
+          if gh release view android-v1.0.0 >/dev/null 2>&1; then
+            echo 'Release android-v1.0.0 already exists; keeping its signed APK unchanged.'
+          else
+            gh release create android-v1.0.0 GestureParticles-Android-v1.0.0.apk \
+              --title '手势粒子照片 Android v1.0.0' \
+              --notes '可安装的安卓 APK。照片、背景音和手势模型已打包，安装后无需网络。首次点击“启动摄像头”时请允许摄像头权限。'
+          fi

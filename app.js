@@ -13,9 +13,16 @@ const cameraButton = $('cameraButton');
 const cameraButtonText = $('cameraButtonText');
 const densityInput = $('densityInput');
 const volumeInput = $('volumeInput');
+const compactScreen = window.matchMedia('(max-width: 760px)').matches;
+if (compactScreen) {
+  densityInput.min = '2500';
+  densityInput.max = '12000';
+  densityInput.value = '6500';
+  $('densityValue').textContent = '6,500';
+}
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compactScreen ? 1.35 : 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
@@ -98,6 +105,7 @@ let userRotX = 0;
 let userZoom = 0;
 let frames = 0;
 let fpsMark = performance.now();
+let lastRenderAt = 0;
 
 function updateStatus(message, active = false) {
   statusText.textContent = message;
@@ -430,6 +438,8 @@ canvas.addEventListener('wheel', e => { e.preventDefault(); userZoom = Math.max(
 
 function animate(now) {
   requestAnimationFrame(animate);
+  if (compactScreen && now - lastRenderAt < 32) return;
+  lastRenderAt = now;
   const time = now * 0.001;
   if (cameraRunning && recognizer && video.readyState >= 2 && now - lastDetectAt > 80 && video.currentTime !== lastVideoTime) {
     lastDetectAt = now;
@@ -464,3 +474,4 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 window.addEventListener('pagehide', () => { if (stream) stream.getTracks().forEach(track => track.stop()); if (uploadedObjectUrl) URL.revokeObjectURL(uploadedObjectUrl); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && cameraRunning) stopCamera(); });
