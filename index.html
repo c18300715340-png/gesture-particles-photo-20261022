@@ -64,7 +64,7 @@
 
     <section class="monitor" aria-label="摄像头监视窗口">
       <div class="monitor-top"><span><span class="live-dot"></span> LIVE INPUT</span><span id="fpsLabel">— FPS</span></div>
-      <div class="video-frame"><video id="cameraVideo" autoplay muted playsinline></video><canvas id="handCanvas" aria-hidden="true"></canvas><div id="cameraPlaceholder" class="camera-placeholder"><div class="target-shape"><span></span><span></span><span></span><span></span></div><p>等待摄像头画面</p></div><span class="frame-corner top-left"></span><span class="frame-corner top-right"></span><span class="frame-corner bottom-left"></span><span class="frame-corner bottom-right"></span></div>
+      <div class="video-frame"><video id="cameraVideo" autoplay muted playsinline></video><img id="nativeCameraPreview" alt="实时摄像头画面" hidden><canvas id="handCanvas" aria-hidden="true"></canvas><div id="cameraPlaceholder" class="camera-placeholder"><div class="target-shape"><span></span><span></span><span></span><span></span></div><p>等待摄像头画面</p></div><span class="frame-corner top-left"></span><span class="frame-corner top-right"></span><span class="frame-corner bottom-left"></span><span class="frame-corner bottom-right"></span></div>
       <div class="monitor-bottom"><span id="gestureLabel">未识别手势</span><span id="confidenceLabel">--</span></div>
     </section>
 

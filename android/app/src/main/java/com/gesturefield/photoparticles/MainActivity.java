@@ -1,7 +1,6 @@
 package com.gesturefield.photoparticles;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -9,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.PermissionRequest;
+import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -17,20 +17,23 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import androidx.activity.ComponentActivity;
 import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
 
 import java.util.Arrays;
 
-public final class MainActivity extends Activity {
+public final class MainActivity extends ComponentActivity {
     private static final String APP_HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://appassets.androidplatform.net/assets/www/index.html";
     private static final int CAMERA_REQUEST = 1001;
     private static final int IMAGE_REQUEST = 1002;
+    static final int NATIVE_CAMERA_REQUEST = 1003;
 
     private WebView webView;
     private PermissionRequest pendingCameraRequest;
     private ValueCallback<Uri[]> pendingFileChooser;
+    private NativeGestureController nativeGestureController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,15 @@ public final class MainActivity extends Activity {
                 .build();
 
         webView = new WebView(this);
+        nativeGestureController = new NativeGestureController(this, webView);
+        webView.addJavascriptInterface(new Object() {
+            @JavascriptInterface public void start() {
+                runOnUiThread(() -> nativeGestureController.start());
+            }
+            @JavascriptInterface public void stop() {
+                runOnUiThread(() -> nativeGestureController.stop());
+            }
+        }, "AndroidGesture");
         webView.setBackgroundColor(Color.rgb(8, 13, 22));
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         WebSettings settings = webView.getSettings();
@@ -139,6 +151,10 @@ public final class MainActivity extends Activity {
                 request.deny();
             }
         }
+        if (requestCode == NATIVE_CAMERA_REQUEST) {
+            nativeGestureController.onCameraPermissionResult(grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+        }
     }
 
     @Override
@@ -164,6 +180,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (nativeGestureController != null) nativeGestureController.close();
         if (pendingCameraRequest != null) pendingCameraRequest.deny();
         if (pendingFileChooser != null) pendingFileChooser.onReceiveValue(null);
         if (webView != null) webView.destroy();

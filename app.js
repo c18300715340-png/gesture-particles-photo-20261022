@@ -3,6 +3,7 @@ import * as THREE from './vendor/three/three.module.js';
 const $ = (id) => document.getElementById(id);
 const canvas = $('scene');
 const video = $('cameraVideo');
+const nativeCameraPreview = $('nativeCameraPreview');
 const handCanvas = $('handCanvas');
 const handCtx = handCanvas.getContext('2d');
 const statusText = $('statusText');
@@ -365,6 +366,10 @@ async function startCamera() {
   cameraDiagnostic.hidden = true;
   cameraDiagnostic.textContent = '';
   updateStatus('正在请求摄像头权限');
+  if (window.AndroidGesture) {
+    window.AndroidGesture.start();
+    return;
+  }
   let startupStep = '请求摄像头';
   try {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('请使用 HTTPS 或 localhost 打开此页面');
@@ -415,17 +420,52 @@ async function startCamera() {
 }
 
 function stopCamera() {
+  if (window.AndroidGesture) window.AndroidGesture.stop();
   if (stream) stream.getTracks().forEach(track => track.stop());
   stream = null;
   video.srcObject = null;
   cameraRunning = false;
   if (recognizer) { recognizer.close(); recognizer = null; }
   handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+  nativeCameraPreview.hidden = true;
+  nativeCameraPreview.removeAttribute('src');
   $('cameraPlaceholder').hidden = false;
   cameraButtonText.textContent = '启动摄像头';
   updateStatus('摄像头已关闭');
   setMode('idle');
 }
+
+window.onNativeCameraReady = () => {
+  cameraRunning = true;
+  cameraButton.disabled = false;
+  cameraButtonText.textContent = '关闭摄像头';
+  handCanvas.width = 320;
+  handCanvas.height = 240;
+  handCanvas.style.transform = 'none';
+  $('cameraPlaceholder').hidden = true;
+  nativeCameraPreview.hidden = false;
+  updateStatus('正在识别手势', true);
+};
+
+window.onNativeCameraError = (message) => {
+  cameraRunning = false;
+  cameraButton.disabled = false;
+  cameraButtonText.textContent = '重试摄像头';
+  $('cameraPlaceholder').hidden = false;
+  nativeCameraPreview.hidden = true;
+  updateStatus(`启动失败：${message}`, false);
+  cameraDiagnostic.textContent = `启动失败：${message}`;
+  cameraDiagnostic.hidden = false;
+};
+
+window.onNativeGesture = (result) => {
+  if (!cameraRunning) return;
+  if (result.preview) nativeCameraPreview.src = `data:image/jpeg;base64,${result.preview}`;
+  handleRecognition({
+    gestures: result.name ? [[{ categoryName: result.name, score: result.score }]] : [],
+    landmarks: result.landmarks ? [result.landmarks] : []
+  });
+};
 
 cameraButton.addEventListener('click', startCamera);
 panelToggle.addEventListener('click', () => {
