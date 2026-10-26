@@ -11,6 +11,9 @@ const gestureLabel = $('gestureLabel');
 const confidenceLabel = $('confidenceLabel');
 const cameraButton = $('cameraButton');
 const cameraButtonText = $('cameraButtonText');
+const cameraDiagnostic = $('cameraDiagnostic');
+const panelToggle = $('panelToggle');
+const panelBody = $('panelBody');
 const densityInput = $('densityInput');
 const volumeInput = $('volumeInput');
 const compactScreen = window.matchMedia('(max-width: 760px)').matches;
@@ -359,11 +362,15 @@ async function startCamera() {
   prepareAudio();
   cameraButton.disabled = true;
   cameraButtonText.textContent = '连接中…';
+  cameraDiagnostic.hidden = true;
+  cameraDiagnostic.textContent = '';
   updateStatus('正在请求摄像头权限');
+  let startupStep = '请求摄像头';
   try {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('请使用 HTTPS 或 localhost 打开此页面');
     stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
     video.srcObject = stream;
+    startupStep = '启动摄像头画面';
     await video.play();
     handCanvas.width = video.videoWidth || 640;
     handCanvas.height = video.videoHeight || 480;
@@ -371,28 +378,39 @@ async function startCamera() {
     cameraRunning = true;
     cameraButtonText.textContent = '关闭摄像头';
     updateStatus('摄像头已连接 · 正在加载手势模型', true);
+    startupStep = '加载手势脚本';
     const { GestureRecognizer, FilesetResolver } = await import('./vendor/mediapipe/vision_bundle.mjs');
+    startupStep = '加载识别引擎';
     const vision = await FilesetResolver.forVisionTasks(new URL('./vendor/mediapipe/wasm/', import.meta.url).href);
+    startupStep = '读取手势模型';
+    const modelResponse = await fetch(new URL('./vendor/mediapipe/gesture_recognizer.task', import.meta.url));
+    if (!modelResponse.ok) throw new Error(`模型读取失败 (${modelResponse.status})`);
+    const modelBytes = new Uint8Array(await modelResponse.arrayBuffer());
     const options = {
-      baseOptions: { modelAssetPath: new URL('./vendor/mediapipe/gesture_recognizer.task', import.meta.url).href, delegate: 'GPU' },
+      baseOptions: { modelAssetBuffer: modelBytes, delegate: 'CPU' },
       runningMode: 'VIDEO',
       numHands: 1,
       minHandDetectionConfidence: 0.55,
       minTrackingConfidence: 0.5
     };
-    try { recognizer = await GestureRecognizer.createFromOptions(vision, options); }
-    catch { recognizer = await GestureRecognizer.createFromOptions(vision, { ...options, baseOptions: { ...options.baseOptions, delegate: 'CPU' } }); }
+    startupStep = '初始化手势识别';
+    recognizer = await GestureRecognizer.createFromOptions(vision, options);
     if (!cameraRunning) { recognizer.close(); recognizer = null; return; }
     updateStatus('正在识别手势', true);
   } catch (error) {
-    console.error('摄像头或手势模型启动失败', error);
+    console.error(`摄像头或手势模型启动失败（${startupStep}）`, error);
     if (recognizer) { recognizer.close(); recognizer = null; }
     if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
     video.srcObject = null;
     cameraRunning = false;
     $('cameraPlaceholder').hidden = false;
     cameraButtonText.textContent = '重试摄像头';
-    updateStatus(error.name === 'NotAllowedError' ? '未获摄像头权限，请在浏览器地址栏允许' : `启动失败：${error.message}`, false);
+    const detail = error?.message || (typeof error === 'string' ? error : error?.name) || '未知错误';
+    const permissionDenied = error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError';
+    const message = permissionDenied ? '摄像头权限被拒绝，请在手机设置中允许' : `启动失败（${startupStep}）：${detail}`;
+    updateStatus(message, false);
+    cameraDiagnostic.textContent = message;
+    cameraDiagnostic.hidden = false;
   } finally { cameraButton.disabled = false; }
 }
 
@@ -410,6 +428,12 @@ function stopCamera() {
 }
 
 cameraButton.addEventListener('click', startCamera);
+panelToggle.addEventListener('click', () => {
+  const expanded = panelBody.hidden;
+  panelBody.hidden = !expanded;
+  panelToggle.setAttribute('aria-expanded', String(expanded));
+  panelToggle.textContent = expanded ? '缩小控制台 −' : '放大控制台 ＋';
+});
 $('imageInput').addEventListener('change', async (event) => {
   const file = event.target.files?.[0];
   if (!file) return;

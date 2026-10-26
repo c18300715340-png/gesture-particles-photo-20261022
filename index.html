@@ -34,12 +34,14 @@
     </section>
 
     <aside class="control-panel" aria-label="交互控制">
-      <div class="panel-head"><span>CONTROL STATION</span><span class="panel-index">01 — 04</span></div>
+      <div class="panel-head"><span>CONTROL STATION</span><button id="panelToggle" class="panel-toggle" type="button" aria-controls="panelBody" aria-expanded="true">缩小控制台 −</button></div>
       <h2>控制台<span class="panel-spark">✦</span></h2>
       <p class="panel-note">摄像头画面仅在本机处理。张掌显示粒子照片，握拳还原清晰原图。</p>
 
       <button id="cameraButton" class="primary-button" type="button"><span class="button-symbol">◉</span><span id="cameraButtonText">启动摄像头</span><span class="button-arrow">↗</span></button>
+      <p id="cameraDiagnostic" class="camera-diagnostic" role="alert" hidden></p>
 
+      <div id="panelBody" class="panel-body">
       <label class="upload-zone" for="imageInput">
         <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
         <span class="upload-icon">⬡</span>
@@ -57,6 +59,7 @@
       <div class="control-divider"></div>
       <p class="mini-label">没有摄像头？先试试手动演示</p>
       <div class="demo-buttons"><button id="demoOpen" type="button">张掌粒子</button><button id="demoFist" type="button">握拳照片</button><button id="demoIdle" type="button">复位</button></div>
+      </div>
     </aside>
 
     <section class="monitor" aria-label="摄像头监视窗口">

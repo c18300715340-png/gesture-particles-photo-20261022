@@ -53,11 +53,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.0.apk
-          if gh release view android-v1.0.0 >/dev/null 2>&1; then
-            echo 'Release android-v1.0.0 already exists; keeping its signed APK unchanged.'
+          cp android/app/build/outputs/apk/debug/app-debug.apk GestureParticles-Android-v1.0.1.apk
+          if gh release view android-v1.0.1 >/dev/null 2>&1; then
+            echo 'Release android-v1.0.1 already exists; keeping its signed APK unchanged.'
           else
-            gh release create android-v1.0.0 GestureParticles-Android-v1.0.0.apk \
-              --title '手势粒子照片 Android v1.0.0' \
-              --notes '可安装的安卓 APK。照片、背景音和手势模型已打包，安装后无需网络。首次点击“启动摄像头”时请允许摄像头权限。'
+            gh release create android-v1.0.1 GestureParticles-Android-v1.0.1.apk \
+              --title '手势粒子照片 Android v1.0.1' \
+              --notes '优先使用 CPU 手势识别，修复部分手机启动失败；出现故障时在控制台显示具体失败步骤。照片、背景音和模型已打包，可离线使用。'
           fi
